@@ -1,0 +1,31 @@
+{
+  "name": "node-eddystone-beacon-configuration",
+  "version": "0.0.0",
+  "description": "My posh module",
+  "license": "MIT",
+  "repository": "ragingwind/node-eddystone-beacon-configuration",
+  "author": {
+    "name": "ragingwind",
+    "email": "ragingwind@gmail.com",
+    "url": "ragingwind.me"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    ""
+  ],
+  "dependencies": {
+    "bleno": "^0.1.14",
+    "object-assign": "^3.0.0"
+  },
+  "devDependencies": {
+    "mocha": "*"
+  }
+}
