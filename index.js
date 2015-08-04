@@ -3,8 +3,8 @@
 var util = require('util');
 var bleno = require('bleno');
 var objectAssign = require('object-assign');
-var BlenoCharacteristic = require('bleno').Characteristic;
-var BlenoPrimaryService = bleno.PrimaryService;
+var Characteristic = require('bleno').Characteristic;
+var PrimaryService = bleno.PrimaryService;
 var EventEmitter = require('events').EventEmitter;
 
 var BEACON_PERIOD_LOWEST = 10;
@@ -96,45 +96,45 @@ EddystoneConfigService.prototype._readLockState = function (offset, cb) {
 EddystoneConfigService.prototype._writeUriData = function (data, offset, withoutResponse, cb) {
 	this.beaconConfig.uri = data;
 	this.emit('uriData', 'write', this.beaconConfig.uri.toString(), data);
-	cb(BlenoCharacteristic.RESULT_SUCCESS);
+	cb(Characteristic.RESULT_SUCCESS);
 };
 
 EddystoneConfigService.prototype._readUriData = function (offset, cb) {
 	this.emit('uriData', 'read', this.beaconConfig.uri, offset);
-	cb(BlenoCharacteristic.RESULT_SUCCESS, this.beaconConfig.uri);
+	cb(Characteristic.RESULT_SUCCESS, this.beaconConfig.uri);
 };
 
 EddystoneConfigService.prototype._writeFlags = function (data, offset, withoutResponse, cb) {
 	this.beaconConfig.flags = new Buffer(data);
 	this.emit('flags', 'write', this.beaconConfig.flags, data);
-	cb(BlenoCharacteristic.RESULT_SUCCESS);
+	cb(Characteristic.RESULT_SUCCESS);
 };
 
 EddystoneConfigService.prototype._readFlags = function (offset, cb) {
 	this.emit('flags', 'read', this.beaconConfig.flags, offset);
-	cb(BlenoCharacteristic.RESULT_SUCCESS, this.beaconConfig.flags);
+	cb(Characteristic.RESULT_SUCCESS, this.beaconConfig.flags);
 };
 
 EddystoneConfigService.prototype._writeTxPowerLevel = function (data, offset, withoutResponse, cb) {
 	this.beaconConfig.txPowerLevel = new Buffer(data);
 	this.emit('txPowerLevel', 'write', this.beaconConfig.txPowerLevel, data);
-	cb(BlenoCharacteristic.RESULT_SUCCESS);
+	cb(Characteristic.RESULT_SUCCESS);
 };
 
 EddystoneConfigService.prototype._readTxPowerLevel = function (offset, cb) {
 	this.emit('txPowerLevel', 'read', this.beaconConfig.txPowerLevel, offset);
-	cb(BlenoCharacteristic.RESULT_SUCCESS, this.beaconConfig.txPowerLevel);
+	cb(Characteristic.RESULT_SUCCESS, this.beaconConfig.txPowerLevel);
 };
 
 EddystoneConfigService.prototype._writeTxPowerMode = function (data, offset, withoutResponse, cb) {
 	this.beaconConfig.txPowerMode = new Buffer(data);
 	this.emit('txPowerMode', 'write', this.beaconConfig.txPowerMode, data);
-	cb(BlenoCharacteristic.RESULT_SUCCESS);
+	cb(Characteristic.RESULT_SUCCESS);
 };
 
 EddystoneConfigService.prototype._readTxPowerMode = function (offset, cb) {
 	this.emit('txPowerMode', 'read', this.beaconConfig.txPowerMode, offset);
-	cb(BlenoCharacteristic.RESULT_SUCCESS, this.beaconConfig.txPowerMode);
+	cb(Characteristic.RESULT_SUCCESS, this.beaconConfig.txPowerMode);
 };
 
 EddystoneConfigService.prototype._writeBeaconPeriod = function (data, offset, withoutResponse, cb) {
@@ -150,7 +150,7 @@ EddystoneConfigService.prototype._writeBeaconPeriod = function (data, offset, wi
 	}
 
 	this.emit('beaconPeriod', 'write', this.beaconConfig.beaconPeriod, data);
-	cb(BlenoCharacteristic.RESULT_SUCCESS);
+	cb(Characteristic.RESULT_SUCCESS);
 };
 
 EddystoneConfigService.prototype._readBeaconPeriod = function (offset, cb) {
@@ -164,24 +164,19 @@ EddystoneConfigService.prototype._readBeaconPeriod = function (offset, cb) {
 	}
 
 	this.emit('txPowerMode', 'read', this.beaconConfig.beaconPeriod, offset);
-	cb(BlenoCharacteristic.RESULT_SUCCESS, data);
+	cb(Characteristic.RESULT_SUCCESS, data);
 };
 
 EddystoneConfigService.prototype._reset = function (data, offset, withoutResponse, cb) {
 	console.log('reset', data);
 	this.emit('reset', 'write', data, offset);
-	cb(BlenoCharacteristic.RESULT_SUCCESS);
+	cb(Characteristic.RESULT_SUCCESS);
 };
 
 EddystoneConfigService.prototype._generateCharacteristics = function() {
 	var chs = this.characteristics;
 	return Object.keys(chs).map(function (ch) {
-		var Characteristic = function() {
-			Characteristic.super_.call(this, chs[ch]);
-		};
-
-		util.inherits(Characteristic, BlenoCharacteristic);
-		return new Characteristic();
+		return new Characteristic(chs[ch]);
 	});
 };
 
@@ -206,7 +201,7 @@ EddystoneConfigService.prototype.advertise = function() {
 		}
 
     bleno.setServices([
-      new BlenoPrimaryService({
+      new PrimaryService({
         uuid: 'ee0c2080-8786-40ba-ab96-99b91ac981d8',
         characteristics: _this._generateCharacteristics()
       })
@@ -221,9 +216,9 @@ EddystoneConfigService.prototype.setConfig = function(opts) {
 };
 
 // Exports result code for convenience
-EddystoneConfigService.RESULT_SUCCESS = BlenoCharacteristic.RESULT_SUCCESS;
-EddystoneConfigService.RESULT_INVALID_OFFSET = BlenoCharacteristic.RESULT_INVALID_OFFSET;
-EddystoneConfigService.RESULT_INVALID_ATTRIBUTE_LENGTH = BlenoCharacteristic.RESULT_INVALID_ATTRIBUTE_LENGTH;
-EddystoneConfigService.RESULT_UNLIKELY_ERROR = BlenoCharacteristic.RESULT_UNLIKELY_ERROR;
+EddystoneConfigService.RESULT_SUCCESS = Characteristic.RESULT_SUCCESS;
+EddystoneConfigService.RESULT_INVALID_OFFSET = Characteristic.RESULT_INVALID_OFFSET;
+EddystoneConfigService.RESULT_INVALID_ATTRIBUTE_LENGTH = Characteristic.RESULT_INVALID_ATTRIBUTE_LENGTH;
+EddystoneConfigService.RESULT_UNLIKELY_ERROR = Characteristic.RESULT_UNLIKELY_ERROR;
 
 module.exports = new EddystoneConfigService();
