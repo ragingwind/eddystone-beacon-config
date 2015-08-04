@@ -79,15 +79,22 @@ function EddystoneConfigService() {
 
 util.inherits(EddystoneConfigService, EventEmitter);
 
-EddystoneConfigService.prototype._writeBoolean = function (cb, res, bool) {
+EddystoneConfigService.prototype._writeBoolean = function (bool) {
 	var data = new Buffer(1);
 	data.fill(bool ? 1 : 0);
-	cb(res, data);
+	return data;
 };
 
 EddystoneConfigService.prototype._readLockState = function (offset, cb) {
-	this.emit('lockState', 'read', this.beaconConfig.lockState, offset);
-	this._writeBoolean(cb, this.beaconConfig.lockState);
+	this.emit('lockState', {
+		properties: ['read'],
+		offset: offset
+	}, function(err, opts) {
+		if (!opts || opts.lockState) {
+			throw new Error('Invalid lock state');
+		}
+		cb(err, this._writeBoolean(opts.lockState));
+	}.bind(this));
 };
 
 EddystoneConfigService.prototype._writeUriData = function (data, offset, withoutResponse, cb) {
@@ -216,5 +223,11 @@ EddystoneConfigService.prototype.advertise = function() {
 EddystoneConfigService.prototype.setConfig = function(opts) {
 	this.beaconConfig = objectAssign(this.beaconConfig, opts);
 };
+
+// Exports result code for convenience
+EddystoneConfigService.RESULT_SUCCESS = BlenoCharacteristic.RESULT_SUCCESS;
+EddystoneConfigService.RESULT_INVALID_OFFSET = BlenoCharacteristic.RESULT_INVALID_OFFSET;
+EddystoneConfigService.RESULT_INVALID_ATTRIBUTE_LENGTH = BlenoCharacteristic.RESULT_INVALID_ATTRIBUTE_LENGTH;
+EddystoneConfigService.RESULT_UNLIKELY_ERROR = BlenoCharacteristic.RESULT_UNLIKELY_ERROR;
 
 module.exports = new EddystoneConfigService();

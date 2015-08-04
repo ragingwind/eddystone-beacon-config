@@ -1,10 +1,20 @@
 'use strict';
 
 var beaconConfigService = require('../');
-// var beaconConfigService2 = require('../index2.js');
+var beaconConfig = {
+	name: 'Eddystone-URL Configuration Service',
+	lockState: false,
+	uri: 'http://google.com',
+	flags: 0,
+	txPowerLevel: 0,
+	txPowerMode: 0,
+	beaconPeriod: 0,
+	disabled: true
+};
 
-beaconConfigService.on('lockState', function (mode, res, req) {
-	console.log('lockState', mode, res, req);
+beaconConfigService.on('lockState', function (req, res) {
+	res(beaconConfigService.RESULT_SUCCESS, beaconConfig);
+	console.log('Reponse current lockstate: ', beaconConfig.lockState);
 });
 
 beaconConfigService.on('uriData', function (mode, res, req) {
