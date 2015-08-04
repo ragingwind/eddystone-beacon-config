@@ -7,10 +7,6 @@ var BlenoCharacteristic = require('bleno').Characteristic;
 var BlenoPrimaryService = bleno.PrimaryService;
 var EventEmitter = require('events').EventEmitter;
 
-var TX_POWER_MODE_HIGH = 3;
-var TX_POWER_MODE_MEDIUM = 2;
-var TX_POWER_MODE_LOW = 1;
-var TX_POWER_MODE_LOWEST = 0;
 var BEACON_PERIOD_LOWEST = 10;
 
 function EddystoneConfigService() {
