@@ -23,6 +23,8 @@
   ],
   "dependencies": {
     "bleno": "^0.1.14",
+    "debug": "^2.2.0",
+    "eddystone-url-encoding": "^1.0.0",
     "object-assign": "^3.0.0"
   },
   "devDependencies": {
