@@ -6,55 +6,7 @@ var bleno = require('bleno');
 var objectAssign = require('object-assign');
 var PrimaryService = bleno.PrimaryService;
 var EventEmitter = require('events').EventEmitter;
-var Characteristic = require('./eddystone-config-characteristic');
-
-var EddystoneCharacteristics = {
- lockState: {
-	 uuid: 'ee0c2081-8786-40ba-ab96-99b91ac981d8',
-	 properties: ['read'],
-	 sizeof: 1
- },
- lock: {
-	 uuid: 'ee0c2082-8786-40ba-ab96-99b91ac981d8',
-	 properties: ['read'],
-	 sizeof: 1
- },
- unlock: {
-	 uuid: 'ee0c2083-8786-40ba-ab96-99b91ac981d8',
-	 properties: ['writeWithoutResponse'],
-	 sizeof: 1
- },
- uriData: {
-	 uuid: 'ee0c2084-8786-40ba-ab96-99b91ac981d8',
-	 properties: ['read', 'write'],
-	 typeof: 'uri'
- },
- flags: {
-	 uuid: 'ee0c2085-8786-40ba-ab96-99b91ac981d8',
-	 properties: ['read', 'write'],
-	 sizeof: 1
- },
- txPowerLevel: {
-	 uuid: 'ee0c2086-8786-40ba-ab96-99b91ac981d8',
-	 properties: ['read', 'write'],
-	 typeof: 'array'
- },
- txPowerMode: {
-	 uuid: 'ee0c2087-8786-40ba-ab96-99b91ac981d8',
-	 properties: ['read', 'write'],
-	 sizeof: 1
- },
- beaconPeriod: {
-	 uuid: 'ee0c2088-8786-40ba-ab96-99b91ac981d8',
-	 properties: ['read', 'write'],
-	 sizeof: 2
- },
- reset: {
-	 uuid: 'ee0c2089-8786-40ba-ab96-99b91ac981d8',
-	 properties: ['writeWithoutResponse'],
-	 	sizeof: 1
-	}
-};
+var Characteristics = require('./eddystone-characteristics');
 
 function EddystoneConfigService() {
 	var self = this;
@@ -62,18 +14,10 @@ function EddystoneConfigService() {
 	// set to initialize value
 	self.configs = {};
 
-	// build up beacon configure service
-	var characteristics = Object.keys(EddystoneCharacteristics).map(function (name) {
-		return new Characteristic(objectAssign(EddystoneCharacteristics[name], {
-			name: name,
-			service: self
-		}));
-	});
-
 	// create beacon primaty service with characteristics
 	self.service = new PrimaryService({
 		uuid: 'ee0c2080-8786-40ba-ab96-99b91ac981d8',
-		characteristics: characteristics
+		characteristics: Characteristics.generate(self)
 	});
 
 	// bind lock event
