@@ -1,7 +1,7 @@
 {
-  "name": "node-eddystone-beacon-configuration",
+  "name": "eddystone-beacon-config",
   "version": "0.0.0",
-  "description": "My posh module",
+  "description": "Eddystone beacon configuration service for Node.js",
   "license": "MIT",
   "repository": "ragingwind/node-eddystone-beacon-configuration",
   "author": {
