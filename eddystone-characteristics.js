@@ -6,12 +6,19 @@ var Results = Characteristic;
 var encoding = require('eddystone-url-encoding');
 var objectAssign = require('object-assign');
 
-Results.RESULT_WRITE_NOTE_PERMITTED = 0x03;
+var Results = {
+	Success: 0x00,
+	WriteNotPermitted: 0x03,
+	InsufficientAuthorization: 0x08,
+	InvalidAttributeLength: 0x0d
+};
 
-var TX_POWER_MODE_HIGH = 3;
-var TX_POWER_MODE_MEDIUM = 2;
-var TX_POWER_MODE_LOW = 1;
-var TX_POWER_MODE_LOWEST = 0;
+var TxPowerMode = {
+	High: 3,
+	Medium: 2,
+	Low: 1,
+	Lowest: 0
+};
 
 function byte2buf(sizeof) {
 	var method = ['writeUInt8', 'writeUInt16LE', null, 'writeUInt32LE'][sizeof - 1];
@@ -71,7 +78,7 @@ EddystoneCharacteristic.prototype.onWriteRequest = function (data, offset, witho
 		if (lockState) {
 			cb(Results.RESULT_UNLIKELY_ERROR);
 		} else if (data.length === 0 || data.length >= 13) {
-			cb(Results.RESULT_INVALID_ATTRIBUTE_LENGTH);
+			cb(Results.InvalidAttributeLength);
 		} else {
 			self.emit('beforeWrite', data, function(err) {
 				if (err) {
@@ -82,7 +89,7 @@ EddystoneCharacteristic.prototype.onWriteRequest = function (data, offset, witho
 				req.value = self.fromBuffer(data, offset);
 				self.service.emit('write', req);
 
-				cb(Results.RESULT_SUCCESS);
+				cb(Results.Success);
 			});
 		}
 	});
@@ -98,27 +105,37 @@ EddystoneCharacteristic.prototype.onReadRequest = function (offset, cb) {
 
 	self.service.emit('lock', req, function(lockState) {
 		self.service.emit('read', req, function (data) {
-			cb(Results.RESULT_SUCCESS, self.toBuffer(data));
+			cb(Results.Success, self.toBuffer(data));
 		});
 	});
 };
 
+// characteristics for byte data
+function ByteCharateristic(opts) {
+	ByteCharateristic.super_.call(this, opts);
+
+	this.on('beforeWrite', function(data, res) {
+		res(data.length == opts.sizeof ? Results.Success : Results.InvalidAttributeLength);
+	});
+
+	this.toBuffer = byte2buf(opts.sizeof);
+	this.fromBuffer = buf2byte(opts.sizeof);
+}
+
+util.inherits(ByteCharateristic, EddystoneCharacteristic);
+
+// lock state characteristic
 function LockStateCharateristic(opts) {
 	LockStateCharateristic.super_.call(this, objectAssign({
 		uuid: 'ee0c2081-8786-40ba-ab96-99b91ac981d8',
 		properties: ['read'],
+		sizeof: 1
 	}, opts));
-
-	this.on('beforeWrite', function(data, res) {
-		res(data.length == 1 ? Results.RESULT_SUCCESS : Results.RESULT_INVALID_ATTRIBUTE_LENGTH);
-	});
-
-	this.toBuffer = byte2buf(1);
-	this.fromBuffer = buf2byte(1);
 }
 
-util.inherits(LockStateCharateristic, EddystoneCharacteristic);
+util.inherits(LockStateCharateristic, ByteCharateristic);
 
+// lock characteristic
 function LockCharateristic(opts) {
 	LockCharateristic.super_.call(this, objectAssign({
 		uuid: 'ee0c2082-8786-40ba-ab96-99b91ac981d8',
@@ -126,8 +143,9 @@ function LockCharateristic(opts) {
 	}, opts));
 }
 
-util.inherits(LockCharateristic, EddystoneCharacteristic);
+util.inherits(LockCharateristic, ByteCharateristic);
 
+// unlock characteristic
 function UnlockCharateristic(opts) {
 	UnlockCharateristic.super_.call(this, objectAssign({
 		uuid: 'ee0c2083-8786-40ba-ab96-99b91ac981d8',
@@ -137,6 +155,7 @@ function UnlockCharateristic(opts) {
 
 util.inherits(UnlockCharateristic, EddystoneCharacteristic);
 
+// uri characteristic
 function UriDataCharateristic(opts) {
 	UriDataCharateristic.super_.call(this, objectAssign({
 		uuid: 'ee0c2084-8786-40ba-ab96-99b91ac981d8',
@@ -144,7 +163,7 @@ function UriDataCharateristic(opts) {
 	}, opts));
 
 	this.on('beforeWrite', function(data, res) {
-		res(Results.RESULT_SUCCESS);
+		res(Results.Success);
 	});
 
 	this.toBuffer = encoding.encode;
@@ -153,30 +172,26 @@ function UriDataCharateristic(opts) {
 
 util.inherits(UriDataCharateristic, EddystoneCharacteristic);
 
+// flags characteristic
 function FlagsCharateristic(opts) {
 	FlagsCharateristic.super_.call(this, objectAssign({
 		uuid: 'ee0c2085-8786-40ba-ab96-99b91ac981d8',
-		properties: ['read', 'write']
+		properties: ['read', 'write'],
+		sizeof: 1
 	}, opts));
-
-	this.on('beforeWrite', function(data, res) {
-		res(data.length == 1 ? Results.RESULT_SUCCESS : Results.RESULT_INVALID_ATTRIBUTE_LENGTH);
-	});
-
-	this.toBuffer = byte2buf(1);
-	this.fromBuffer = buf2byte(1);
 }
 
-util.inherits(FlagsCharateristic, EddystoneCharacteristic);
+util.inherits(FlagsCharateristic, ByteCharateristic);
 
+// tx power characteristic
 function TxPowerLevelCharateristic(opts) {
 	TxPowerLevelCharateristic.super_.call(this, objectAssign({
 		uuid: 'ee0c2084-8786-40ba-ab96-99b91ac981d8',
-		properties: ['read', 'write']
+		properties: ['read', 'write'],
 	}, opts));
 
 	this.on('beforeWrite', function(data, res) {
-		res(data.length == 4 ? Results.RESULT_SUCCESS : Results.RESULT_INVALID_ATTRIBUTE_LENGTH);
+		res(data.length == 4 ? Results.Success : Results.InvalidAttributeLength);
 	});
 
 	this.toBuffer = arr2buf;
@@ -185,61 +200,52 @@ function TxPowerLevelCharateristic(opts) {
 
 util.inherits(TxPowerLevelCharateristic, EddystoneCharacteristic);
 
+// tx power mode characteristic
 function TxPowerModeCharateristic(opts) {
 	TxPowerModeCharateristic.super_.call(this, objectAssign({
 		uuid: 'ee0c2087-8786-40ba-ab96-99b91ac981d8',
-		properties: ['read', 'write']
+		properties: ['read', 'write'],
+		sizeof: 1
 	}, opts));
 
+	this.removeAllListeners('beforeWrite');
+
 	this.on('beforeWrite', function(data, res) {
-		var err = Results.RESULT_SUCCESS;
+		var err = Results.Success;
 		var value = this.fromBuffer(data);
 		if (data.length !== 1) {
-			err = Results.RESULT_INVALID_ATTRIBUTE_LENGTH;
-		} else if (value < TX_POWER_MODE_LOWEST || value > TX_POWER_MODE_HIGH) {
-			err = Results.RESULT_WRITE_NOTE_PERMITTED;
+			err = Results.InvalidAttributeLength;
+		} else if (value < TxPowerMode.Lowest || value > TxPowerMode.High) {
+			err = Results.WriteNotPermitted;
 		}
 
 		res(err);
 	});
-
-	this.toBuffer = byte2buf(1);
-	this.fromBuffer = buf2byte(1);
 }
 
-util.inherits(TxPowerModeCharateristic, EddystoneCharacteristic);
+util.inherits(TxPowerModeCharateristic, ByteCharateristic);
 
+// beacon period characteristic
 function BeaconPeriodCharateristic(opts) {
 	BeaconPeriodCharateristic.super_.call(this, objectAssign({
 		uuid: 'ee0c2088-8786-40ba-ab96-99b91ac981d8',
-		properties: ['read', 'write']
+		properties: ['read', 'write'],
+		sizeof: 2
 	}, opts));
-
-	this.on('beforeWrite', function(data, res) {
-		res(data.length == 2 ? Results.RESULT_SUCCESS : Results.RESULT_INVALID_ATTRIBUTE_LENGTH);
-	});
-
-	this.toBuffer = byte2buf(2);
-	this.fromBuffer = buf2byte(2);
 }
 
-util.inherits(BeaconPeriodCharateristic, EddystoneCharacteristic);
+util.inherits(BeaconPeriodCharateristic, ByteCharateristic);
 
+// reset characteristic
 function ResetCharateristic(opts) {
 	ResetCharateristic.super_.call(this, objectAssign({
 		uuid: 'ee0c2089-8786-40ba-ab96-99b91ac981d8',
-		properties: ['writeWithoutResponse']
+		properties: ['writeWithoutResponse'],
+		sizeof: 1
 	}, opts));
-
-	this.on('beforeWrite', function(data, res) {
-		res(data.length == 1 ? Results.RESULT_SUCCESS : Results.RESULT_INVALID_ATTRIBUTE_LENGTH);
-	});
-
-	this.toBuffer = byte2buf(1);
-	this.fromBuffer = buf2byte(1);
 }
 
-util.inherits(ResetCharateristic, EddystoneCharacteristic);
+util.inherits(ResetCharateristic, ByteCharateristic);
 
 module.exports = {
 	generate: function(service) {
