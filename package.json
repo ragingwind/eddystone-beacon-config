@@ -16,10 +16,14 @@
     "test": "mocha"
   },
   "files": [
-    "index.js"
+    "index.js",
+    "eddystone-characteristics.js",
+    "examples"
   ],
   "keywords": [
-    ""
+    "Eddystone",
+    "Eddystone configuration service",
+    "bleno"
   ],
   "dependencies": {
     "bleno": "^0.1.14",
