@@ -92,7 +92,7 @@ EddystoneConfigService.prototype.configure = function(configs) {
 	debug('configuration has been updated: ');
 	debug('  name: %s', this.configs.name);
 	debug('  uri: %s', this.configs.uri);
-	debug('  txPower mode: %d, level: %d', this.configs.txPowerMode, this.configs.txPowerLevel);
+	debug('  txPower mode: %d, level: %s', this.configs.txPowerMode, this.configs.txPowerLevel);
 	debug('  beaconPeriod: %d', this.configs.beaconPeriod);
 
 	return this.configs;
