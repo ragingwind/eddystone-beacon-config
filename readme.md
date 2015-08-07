@@ -1,10 +1,14 @@
 # eddystone-beacon-config
 > Eddystone beacon configuration service for Node.js. The configuration service allows you can build up [Eddystone configuration service](https://github.com/google/eddystone/blob/master/eddystone-url/docs/config-service-spec.md) easily on Node.js with [bleno](https://github.com/sandeepmistry/bleno). This configuration service has passed the validation test of [Eddystone url config validator](https://github.com/google/eddystone/tree/master/eddystone-url/tools/eddystone-url-config-validator)
 
+# WARNING
+
+It rather a bit experimental project to me. I'll keep working for a while so the project content might be changed a lot suddenly.
+
 ## Install
 
 ```
-$ npm install --save node-eddystone-beacon-config
+$ npm install --save eddystone-beacon-config
 ```
 
 
