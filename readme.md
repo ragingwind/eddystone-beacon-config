@@ -3,7 +3,8 @@
 
 # WARNING
 
-It rather a bit experimental project to me. I'll keep working for a while so the project content might be changed a lot suddenly.
+- It rather a bit experimental project to me. I'll keep working for a while so the project content might be changed a lot suddenly.
+- The package has been tested on MacOS only
 
 ## Install
 
