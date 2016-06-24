@@ -3,7 +3,7 @@
   "version": "0.1.2",
   "description": "Eddystone beacon configuration service for Node.js",
   "license": "MIT",
-  "repository": "ragingwind/node-eddystone-beacon-configuration",
+  "repository": "ragingwind/eddystone-beacon-configuration",
   "author": {
     "name": "ragingwind",
     "email": "ragingwind@gmail.com",
